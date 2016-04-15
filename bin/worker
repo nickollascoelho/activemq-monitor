@@ -1,0 +1,12 @@
+/*jshint esversion: 6,  node: true */
+'use strict';
+
+const webWorker = require('./web-worker');
+const dbWorker = require('./db-worker');
+const logWorker = require('./log-worker');
+
+const work = () => webWorker.fetch().then(dbWorker.insert).then(logWorker.write);
+
+module.exports = {
+  work
+};

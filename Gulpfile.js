@@ -16,6 +16,16 @@ gulp.task('clean', function(cb) {
     );
 });
 
+gulp.task('bin', function() {
+    return gulp.src('bin/*worker')
+        .pipe(gulp.dest('dist/bin/'));
+});
+
+gulp.task('lib', function() {
+    return gulp.src('lib/**/*')
+        .pipe(gulp.dest('dist/lib/'));
+});
+
 gulp.task('js', function() {
     return gulp.src('index.js')
         .pipe(gulp.dest('dist/'));
@@ -61,7 +71,7 @@ gulp.task('setup', function() {
 
 });
 
-gulp.task('upload', function() {
+gulp.task('lambda-upload', function() {
     var lambda = new AWS.Lambda({
         apiVersion: '2015-03-31'
     });
@@ -104,14 +114,14 @@ gulp.task('upload', function() {
     });
 });
 
-gulp.task('deploy', function(callback) {
-    runSequence('package', 'upload', callback);
+gulp.task('lambda-deploy', function(callback) {
+    runSequence('package', 'lambda-upload', callback);
 });
 
-gulp.task('package', function(callback) {
-    runSequence('clean', ['js', 'npm', 'env'], 'zip', callback);
+gulp.task('lambda-package', function(callback) {
+    runSequence('clean', ['js', 'bin', 'lib', 'npm', 'env'], 'zip', callback);
 });
 
 gulp.task('default', function(callback) {
-    runSequence('package');
+    runSequence('lambda-package');
 });

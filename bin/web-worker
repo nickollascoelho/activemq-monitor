@@ -1,0 +1,12 @@
+/*jshint esversion: 6,  node: true */
+'use strict';
+
+const config = require('dotenv').config();
+
+const serversList = config.AMQ_SERVER_FARM.split(',');
+
+const fetch = () => require('../lib/fetcher').fetchServersXML(serversList);
+
+module.exports = {
+  fetch
+};

@@ -1,0 +1,78 @@
+/*jshint esversion: 6,  node: true */
+'use strict';
+
+const config = require('dotenv').config();
+const AWS = require('aws-sdk');
+const Q = require('q');
+
+AWS.config.update({
+    region: config.AWS_REGION
+});
+
+AWS.config.apiVersions = {
+    cloudwatchlogs: '2014-03-28'
+};
+
+const cloudwatchlogs = new AWS.CloudWatchLogs();
+
+const AWS_LOG_STREAM_NAME = (() => {
+    let prefix = new Date().toISOString();
+    return prefix.replace(/-/g, '/').replace(/[:\.]/g, '');
+})();
+
+const createLogStream = () => {
+    const params = {
+        logGroupName: config.AWS_LOG_GROUP_NAME,
+        logStreamName: AWS_LOG_STREAM_NAME
+    };
+
+    return Q.ninvoke(cloudwatchlogs, 'createLogStream', params);
+};
+
+const createLogEvents = (hosts) => {
+    const timestamp = Date.now();
+    return hosts.reduce((arr, host) => {
+        arr = arr.concat(host.queues.map(queue => {
+            const stats = queue.stats;
+            const isDLQ = queue.name.indexOf('DLQ.') > -1;
+            const size = stats.size;
+            const maxSize = isDLQ ? 1 : config.AMQ_MAX_QUEUE_SIZE;
+            const isDangerousSize = (size / maxSize) >= 0.75;
+            const label = isDangerousSize ? 'ALERT ' : 'INFO ';
+            const msg = host.hostname + ' ' + queue.name + ' [size: ' + size + '] [consumers: ' + stats.consumerCount + ']';
+            const result = label + msg;
+            return result;
+        }));
+        return arr;
+    }, []).map(message => ({
+        message,
+        timestamp
+    }));
+};
+
+const sendLogEvents = logEvents => {
+    const params = {
+        logEvents,
+        logGroupName: config.AWS_LOG_GROUP_NAME,
+        logStreamName: AWS_LOG_STREAM_NAME
+    };
+    return Q.ninvoke(cloudwatchlogs, 'putLogEvents', params);
+};
+
+const write = hosts => {
+    const logEvents = createLogEvents(hosts);
+    createLogStream()
+        .then(() => {
+            return sendLogEvents(logEvents);
+        })
+        .then(result => console.log(result))
+        .catch(err => {
+            console.log('Error while processing log worker.');
+            console.log(err, err.stack);
+            throw err;
+        });
+};
+
+module.exports = {
+    write
+};

@@ -1,0 +1,42 @@
+/*jshint esversion: 6,  node: true */
+'use strict';
+
+const Q = require('Q');
+
+const Host = require('../lib/model/host');
+const conn = require('../lib/database');
+
+const insert = (list) => {
+    const deferred = Q.defer();
+
+    conn.on('connected', function() {
+        console.log('Mongoose default connection open');
+        list.forEach(host => new new Host(host).save(function(err, doc) {
+            if (err) throw err;
+            else; // Doc saved
+        }));
+        deferred.resolve(list);
+    });
+
+    conn.on('error', function(err) {
+        console.log('Mongoose default connection error: ' + err);
+        deferred.reject(err);
+    });
+
+    conn.on('disconnected', function() {
+        console.log('Mongoose default connection disconnected');
+    });
+
+    process.on('SIGINT', function() {
+        conn.close(function() {
+            console.log('Mongoose default connection disconnected through app termination');
+            process.exit(0);
+        });
+    });
+
+    return deferred.promise;
+};
+
+module.exports = {
+    insert
+};
