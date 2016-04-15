@@ -10,20 +10,17 @@ var config = require('dotenv').config();
 
 AWS.config.region = config.AWS_REGION;
 
-// First we need to clean out the dist folder and remove the compiled zip file.
 gulp.task('clean', function(cb) {
     return del('./dist',
         del('./dist.zip', cb)
     );
 });
 
-// The js task could be replaced with gulp-coffee as desired.
 gulp.task('js', function() {
     return gulp.src('index.js')
         .pipe(gulp.dest('dist/'));
 });
 
-// Here we want to install npm packages to dist, ignoring devDependencies.
 gulp.task('npm', function() {
     return gulp.src('./package.json')
         .pipe(gulp.dest('./dist/'))
@@ -32,13 +29,11 @@ gulp.task('npm', function() {
         }));
 });
 
-// Next copy over environment variables managed outside of source control.
 gulp.task('env', function() {
     return gulp.src('./.env')
         .pipe(gulp.dest('./dist'));
 });
 
-// Now the dist directory is ready to go. Zip it.
 gulp.task('zip', function() {
     return gulp.src(['dist/**/*', '!dist/package.json', 'dist/.*'])
         .pipe(zip('dist.zip'))
@@ -90,7 +85,6 @@ gulp.task('upload', function() {
             return;
         }
 
-        // This is a bit silly, simply because these five parameters are required.
         var current = data.Configuration;
         var params = {
             FunctionName: functionName,
