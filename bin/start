@@ -7,6 +7,5 @@ const logWorker = require('./log-worker');
 
 webWorker.fetch()
 //.then(data => { console.log(JSON.stringify(data, null, 2)); return data; })
-//.then(dbWorker.insert)
-.then(logWorker.write)
-;
+.then(dbWorker.insert)
+.then(logWorker.write);

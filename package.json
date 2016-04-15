@@ -4,7 +4,7 @@
   "description": "Log to cloudwatch activemq queue status",
   "main": "index.js",
   "scripts": {
-    "start": "node bin/start",
+    "start": "nf start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Nickollas Coelho <nickollas.coelho@gmail.com> (http://nickollascoelho.github.io/)",
