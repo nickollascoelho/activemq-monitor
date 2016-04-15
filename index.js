@@ -31,9 +31,9 @@
         }
     };
 
-    const getQueues = (servers) => Q.all(servers.map(mapServerQueues));
+    const getQueues = (urlList) => Q.all(urlList.map(fetchQueues));
 
-    const mapServerQueues = (url) =>
+    const fetchQueues = (url) =>
         fetch(url, fetchOptions)
         .then((response) => response.text())
         .then((xml) => Q.nfcall(parseString, xml))
@@ -96,21 +96,26 @@
     };
 
     exports.handler = (event, context, callback) => {
-        const servers = config.AMQ_SERVER_FARM.split(',');
+        const urlList = config.AMQ_SERVER_FARM.split(',');
 
-        Q
-            .all([getQueues(servers), createLogStream()])
-            .spread((queues, logStream) => {
-                const logEvents = createLogEvents(queues);
-                const params = {
-                    logEvents,
-                    logGroupName: AWS_LOG_GROUP_NAME,
-                    logStreamName: AWS_LOG_STREAM_NAME
-                };
-                return Q.ninvoke(cloudwatchlogs, 'putLogEvents', params);
-            })
-            .catch(err => callback ? callback(err, null) : console.log(err, err.stack))
-            .done(() => callback ? callback(null, 'done') : console.log('done'));
+        const sendLogEvents = (queues, logStream) => {
+            const logEvents = createLogEvents(queues);
+            const params = {
+                logEvents,
+                logGroupName: AWS_LOG_GROUP_NAME,
+                logStreamName: AWS_LOG_STREAM_NAME
+            };
+            return Q.ninvoke(cloudwatchlogs, 'putLogEvents', params);
+        };
+
+        const promises = [getQueues(urlList), createLogStream()];
+
+        Q.all(promises)
+            .spread(sendLogEvents)
+            .catch(err => callback(err, null))
+            .done(() => callback(null, {
+                success: true
+            }));
     };
 
 })();
