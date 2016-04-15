@@ -1,1 +1,0 @@
-{ ($.queue.name = DLQ.*) && ($.queue.stats.size > 0) }
