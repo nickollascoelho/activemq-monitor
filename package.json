@@ -1,13 +1,13 @@
 {
   "name": "activemq-logger",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "Log to cloudwatch activemq queue status",
   "main": "index.js",
   "scripts": {
     "start": "node index",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Nickollas Coelho <nickollas.coelho@gmail.com> (http://nickollascoelho.github.io/)",
   "license": "MIT",
   "dependencies": {
     "dotenv": "2.0.0",
@@ -16,6 +16,14 @@
     "xml2js": "0.4.16"
   },
   "devDependencies": {
-    "aws-sdk": "2.3.3"
+    "aws-sdk": "2.3.3",
+    "del": "2.2.0",
+    "gulp": "3.9.1",
+    "gulp-install": "0.6.0",
+    "gulp-rename": "1.2.2",
+    "gulp-zip": "3.2.0",
+    "kinesis": "1.2.2",
+    "run-sequence": "1.1.5",
+    "stream": "0.0.2"
   }
 }
