@@ -1,0 +1,21 @@
+{
+  "name": "activemq-logger",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "2.0.0",
+    "node-fetch": "1.5.1",
+    "q": "1.4.1",
+    "xml2js": "0.4.16"
+  },
+  "devDependencies": {
+    "aws-sdk": "2.3.3"
+  }
+}
