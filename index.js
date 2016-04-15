@@ -46,9 +46,9 @@
                 };
 
                 for (let a in q.stats) {
-                  if (typeof q.stats[a] !== 'number' && !isNaN(q.stats[a])) {
-                    q.stats[a] = parseInt(q.stats[a]);
-                  }
+                    if (typeof q.stats[a] !== 'number' && !isNaN(q.stats[a])) {
+                        q.stats[a] = parseInt(q.stats[a]);
+                    }
                 }
 
                 obj.queues.push(q);
@@ -64,8 +64,8 @@
 
     const createLogStream = () => {
         const logStreamNamePrefix = () => {
-          let prefix = new Date().toISOString();
-          return prefix.replace(/-/g, '/').replace(/[:\.]/g, '');
+            let prefix = new Date().toISOString();
+            return prefix.replace(/-/g, '/').replace(/[:\.]/g, '');
         };
 
         AWS_LOG_STREAM_NAME = logStreamNamePrefix() + config.AWS_LOG_STREAM_NAME;
@@ -99,18 +99,18 @@
         const servers = config.AMQ_SERVER_FARM.split(',');
 
         Q
-            .all([getQueues(servers), createLogStream()]).spread((queues, logStream) => {
+            .all([getQueues(servers), createLogStream()])
+            .spread((queues, logStream) => {
                 const logEvents = createLogEvents(queues);
                 const params = {
                     logEvents,
                     logGroupName: AWS_LOG_GROUP_NAME,
                     logStreamName: AWS_LOG_STREAM_NAME
                 };
-
-              return Q.ninvoke(cloudwatchlogs, 'putLogEvents', params);
+                return Q.ninvoke(cloudwatchlogs, 'putLogEvents', params);
             })
-            .catch(err => console.log(err, err.stack))
-            .done(() => callback ? callback(null, 'done') : 'done');
+            .catch(err => callback ? callback(err, null) : console.log(err, err.stack))
+            .done(() => callback ? callback(null, 'done') : console.log('done'));
     };
 
 })();
